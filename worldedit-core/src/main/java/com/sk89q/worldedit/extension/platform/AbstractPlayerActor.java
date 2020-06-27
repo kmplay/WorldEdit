@@ -436,7 +436,7 @@ public abstract class AbstractPlayerActor implements Actor, Player, Cloneable {
         if (typeId.hasBlockType()) {
             return typeId.getBlockType().getDefaultState().toBaseBlock();
         } else {
-            throw new NotABlockException();
+            throw new NotABlockException(typeId);
         }
     }
 
