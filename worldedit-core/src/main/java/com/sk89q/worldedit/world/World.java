@@ -27,6 +27,7 @@ import com.sk89q.worldedit.blocks.BaseItemStack;
 import com.sk89q.worldedit.extension.platform.Platform;
 import com.sk89q.worldedit.extent.Extent;
 import com.sk89q.worldedit.function.mask.Mask;
+import com.sk89q.worldedit.internal.util.NonAbstractForCompatibility;
 import com.sk89q.worldedit.math.BlockVector2;
 import com.sk89q.worldedit.math.BlockVector3;
 import com.sk89q.worldedit.math.Vector3;
@@ -99,20 +100,6 @@ public interface World extends Extent, Keyed {
      * @return Whether it succeeded
      */
     boolean useItem(BlockVector3 position, BaseItem item, Direction face);
-
-    /**
-     * Does this world fully support 3D biomes?
-     *
-     * <p>
-     * If {@code false}, the world only visually reads biomes from {@code y = 0}.
-     * The biomes will still be set in 3D, but the client will only see the one at
-     * {@code y = 0}. It is up to the caller to determine if they want to set that
-     * biome instead, or simply warn the actor.
-     * </p>
-     *
-     * @return if the world fully supports 3D biomes
-     */
-    boolean fullySupports3DBiomes();
 
     /**
      * Similar to {@link Extent#setBlock(BlockVector3, BlockStateHolder)} but a
@@ -225,7 +212,25 @@ public interface World extends Extent, Keyed {
      * @param editSession the {@link EditSession}
      * @return true if re-generation was successful
      */
-    boolean regenerate(Region region, EditSession editSession);
+    default boolean regenerate(Region region, EditSession editSession) {
+        return regenerate(region, editSession, RegenOptions.builder().build());
+    }
+
+    /**
+     * Regenerate an area.
+     *
+     * @param region the region
+     * @param editSession the {@link EditSession}
+     * @param options the regeneration options
+     * @return true if regeneration was successful
+     */
+    @NonAbstractForCompatibility(
+        delegateName = "regenerate",
+        delegateParams = { Region.class, EditSession.class }
+    )
+    default boolean regenerate(Region region, EditSession editSession, RegenOptions options) {
+        return regenerate(region, editSession);
+    }
 
     /**
      * Generate a tree at the given position.

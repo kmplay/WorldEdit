@@ -36,7 +36,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(ServerPlayerEntity.class)
 public abstract class MixinServerPlayerEntity extends PlayerEntity implements ExtendedPlayerEntity {
 
-    private String language;
+    private String language = "en_us";
 
     public MixinServerPlayerEntity(World world, BlockPos blockPos, GameProfile gameProfile) {
         super(world, blockPos, gameProfile);
@@ -44,7 +44,9 @@ public abstract class MixinServerPlayerEntity extends PlayerEntity implements Ex
 
     @Inject(method = "swingHand", at = @At(value = "HEAD"))
     public void onSwing(Hand hand, @SuppressWarnings("unused") CallbackInfo callbackInfo) {
-        FabricWorldEdit.inst.onLeftClickAir(this, this.world, hand);
+        if (hand == Hand.MAIN_HAND) {
+            FabricWorldEdit.inst.onLeftClickAir(this);
+        }
     }
 
     @Inject(method = "setClientSettings", at = @At(value = "HEAD"))

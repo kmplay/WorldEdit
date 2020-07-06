@@ -25,7 +25,7 @@ configure<LoomGradleExtension> {
 }
 
 val minecraftVersion = "1.16.1"
-val yarnMappings = "1.16.1+build.4:v2"
+val yarnMappings = "1.16.1+build.5:v2"
 val loaderVersion = "0.8.8+build.202"
 
 configurations.all {
@@ -44,23 +44,29 @@ repositories {
 }
 
 dependencies {
-    "compile"(project(":worldedit-core"))
-    "compile"("org.apache.logging.log4j:log4j-slf4j-impl:2.8.1")
+    "implementation"(project(":worldedit-core"))
+    "implementation"("org.apache.logging.log4j:log4j-slf4j-impl:2.8.1")
 
     "minecraft"("com.mojang:minecraft:$minecraftVersion")
     "mappings"("net.fabricmc:yarn:$yarnMappings")
-    "modCompile"("net.fabricmc:fabric-loader:$loaderVersion")
+    "modImplementation"("net.fabricmc:fabric-loader:$loaderVersion")
 
     // [1] declare fabric-api dependency...
-    "fabricApi"("net.fabricmc.fabric-api:fabric-api:0.13.1+build.370-1.16")
+    "fabricApi"("net.fabricmc.fabric-api:fabric-api:0.14.0+build.371-1.16")
 
-    // [2] and now we resolve it to pick out what we want :D
-    val wantedDependencies = setOf(
-        "net.fabricmc.fabric-api:fabric-api-base",
-        "net.fabricmc.fabric-api:fabric-events-interaction-v0",
-        "net.fabricmc.fabric-api:fabric-events-lifecycle-v0",
-        "net.fabricmc.fabric-api:fabric-networking-v0"
-    )
+    // [2] Load the API dependencies from the fabric mod json...
+    @Suppress("UNCHECKED_CAST")
+    val fabricModJson = file("src/main/resources/fabric.mod.json").bufferedReader().use {
+        groovy.json.JsonSlurper().parse(it) as Map<String, Map<String, *>>
+    }
+    val wantedDependencies = (fabricModJson["depends"] ?: error("no depends in fabric.mod.json")).keys
+        .filter { it == "fabric-api-base" || it.contains(Regex("v\\d$")) }
+        .map { "net.fabricmc.fabric-api:$it" }
+    logger.lifecycle("Looking for these dependencies:")
+    for (wantedDependency in wantedDependencies) {
+        logger.lifecycle(wantedDependency)
+    }
+    // [3] and now we resolve it to pick out what we want :D
     val fabricApiDependencies = fabricApiConfiguration.incoming.resolutionResult.allDependencies
         .onEach {
             if (it is UnresolvedDependencyResult) {
@@ -93,11 +99,9 @@ dependencies {
     }
 
     // Hook these up manually, because Fabric doesn't seem to quite do it properly.
-    "compileClasspath"("net.fabricmc:sponge-mixin:${project.versions.mixin}")
+    "compileOnly"("net.fabricmc:sponge-mixin:${project.versions.mixin}")
     "annotationProcessor"("net.fabricmc:sponge-mixin:${project.versions.mixin}")
     "annotationProcessor"("net.fabricmc:fabric-loom:${project.versions.loom}")
-
-    "testCompile"("org.mockito:mockito-core:1.9.0-rc1")
 }
 
 configure<BasePluginConvention> {

@@ -135,13 +135,13 @@ public class BukkitPlayer extends AbstractPlayerActor {
 
     @Override
     public void print(Component component) {
-        TextAdapter.sendComponent(player, WorldEditText.format(component, getLocale()));
+        TextAdapter.sendMessage(player, WorldEditText.format(component, getLocale()));
     }
 
     @Override
-    public void setPosition(Vector3 pos, float pitch, float yaw) {
-        player.teleport(new Location(player.getWorld(), pos.getX(), pos.getY(),
-                pos.getZ(), yaw, pitch));
+    public boolean trySetPosition(Vector3 pos, float pitch, float yaw) {
+        return player.teleport(new Location(player.getWorld(), pos.getX(), pos.getY(),
+            pos.getZ(), yaw, pitch));
     }
 
     @Override
@@ -230,8 +230,8 @@ public class BukkitPlayer extends AbstractPlayerActor {
     public void sendAnnouncements() {
         if (WorldEditPlugin.getInstance().getBukkitImplAdapter() == null) {
             printError(TranslatableComponent.of("worldedit.version.bukkit.unsupported-adapter",
-                    TextComponent.of("https://www.enginehub.org/worldedit/#downloads", TextColor.AQUA)
-                        .clickEvent(ClickEvent.openUrl("https://www.enginehub.org/worldedit/#downloads"))));
+                    TextComponent.of("https://enginehub.org/worldedit/#downloads", TextColor.AQUA)
+                        .clickEvent(ClickEvent.openUrl("https://enginehub.org/worldedit/#downloads"))));
         }
     }
 

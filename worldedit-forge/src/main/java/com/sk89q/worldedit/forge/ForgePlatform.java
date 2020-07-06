@@ -41,6 +41,8 @@ import net.minecraft.server.management.PlayerList;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SharedConstants;
 import net.minecraft.world.server.ServerWorld;
+import net.minecraft.world.storage.IServerWorldInfo;
+import net.minecraft.world.storage.ServerWorldInfo;
 import net.minecraftforge.fml.server.ServerLifecycleHooks;
 import org.enginehub.piston.Command;
 import org.enginehub.piston.CommandManager;
@@ -146,7 +148,7 @@ class ForgePlatform extends AbstractPlatform implements MultiUserPlatform {
             return world;
         } else {
             for (ServerWorld ws : server.getWorlds()) {
-                if (ws.getWorldInfo().getWorldName().equals(world.getName())) {
+                if (((IServerWorldInfo) ws.getWorldInfo()).getWorldName().equals(world.getName())) {
                     return new ForgeWorld(ws);
                 }
             }
